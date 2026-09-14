@@ -30,7 +30,7 @@ Food Delivery Aggregator (Mini-DoorDash).
 1.  [Problem Statement](docs/01_Problem_Statement.md)
 2.  [Business Rules](docs/02_Business_Rules.md)
 3.  [ER/EER Diagram](docs/03_ERD.png)
-4.  [Project Report](doc/04_BAO_CAO_NHOM_DI_MUOI_TUAN_3_4.pdf)
+4.  [Project Report](docs/04_BAO_CAO_NHOM_DI_MUOI_TUAN_3_4.pdf)
 
 ### Conceptual Model Summary
 
