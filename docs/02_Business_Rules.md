@@ -1,83 +1,132 @@
 # Business Rules
 
+These business rules define the constraints represented in the current
+Phase 1 comprehensive ER/EER model.
+
 ## Customer and Order
 
-1. Every ORDER is placed by exactly one CUSTOMER.
-
-2. A CUSTOMER can place one or many ORDERS.
+1.  Every ORDER is placed by exactly one CUSTOMER.
+2.  A CUSTOMER can place zero or many ORDERS.
 
 ## Restaurant and Order
 
-3. Every ORDER belongs to exactly one RESTAURANT.
+3.  Every ORDER belongs to exactly one RESTAURANT.
+4.  A RESTAURANT can receive zero or many ORDERS.
 
-4. A RESTAURANT can receive one or many ORDERS.
+## Order and Delivery Assignment
 
-## Driver and Order
-
-5. An ORDER may be delivered by zero or one DRIVER.
-
-6. A DRIVER can deliver zero or many ORDERS.
+5.  Every DELIVERY_ASSIGNMENT belongs to exactly one ORDER.
+6.  An ORDER can have zero or many DELIVERY_ASSIGNMENTS.
+7.  At a given time, an ORDER has at most one active
+    DELIVERY_ASSIGNMENT.
 
 ## Order and Order Item
 
-7. Every ORDER must contain one or more ORDER_ITEMS.
+8.  Every ORDER must contain one or more ORDER_ITEMS.
+9.  Every ORDER_ITEM belongs to exactly one ORDER.
+10. Every ORDER_ITEM refers to exactly one MENU_ITEM_VARIANT.
 
-8. Every ORDER_ITEM belongs to exactly one ORDER.
+## Delivery Assignment and Driver
 
-## Order Item and Menu Item
+11. Every DELIVERY_ASSIGNMENT is assigned to exactly one DRIVER.
+12. A DRIVER can have zero or many DELIVERY_ASSIGNMENTS.
+13. If a DELIVERY_ASSIGNMENT fails or is cancelled, the system creates a
+    new DELIVERY_ASSIGNMENT for the next driver while retaining the
+    previous assignment for delivery history.
+14. If a DELIVERY_ASSIGNMENT has status Failed, failure_reason must be
+    recorded.
+15. The status of a DELIVERY_ASSIGNMENT must follow the valid
+    delivery-assignment status transitions defined by the system.
 
-9. Every ORDER_ITEM refers to exactly one MENU_ITEM.
+## Menu Item and Variant
 
-10. A MENU_ITEM can be referenced by zero or many ORDER_ITEMS.
+16. Every MENU_ITEM_VARIANT belongs to exactly one MENU_ITEM.
+17. A MENU_ITEM can have zero or many MENU_ITEM_VARIANTS.
+18. A MENU_ITEM_VARIANT can have its own price and availability status.
 
 ## Restaurant and Menu Item
 
-11. A RESTAURANT offers one or many MENU_ITEMS.
-
-12. A MENU_ITEM may be offered by zero or one RESTAURANT.
+19. A RESTAURANT offers zero or many MENU_ITEMS.
+20. A MENU_ITEM is offered by zero or one RESTAURANT.
 
 ## Driver and Location
 
-13. Every DRIVER has one current LOCATION.
+21. A DRIVER can have zero or many LOCATION records.
+22. Every LOCATION record belongs to exactly one DRIVER.
+23. LOCATION records represent the driver's recorded position over time
+    for delivery tracking.
 
-14. A LOCATION can represent the current position of zero or many
-DRIVERS.
+## Derived Attributes
+
+24. RESTAURANT.avg_rating is derived from the related REVIEW records.
+25. ORDER.current_status is derived from the most recent
+    ORDER_STATUS_HISTORY record.
+26. CUSTOMER.loyalty_points is derived from the sum of points recorded
+    in LOYALTY_TRANSACTION.
+27. ORDER.estimated_delivery_time is derived from order processing and
+    delivery information.
 
 ## Customer and Review
 
-15. Every REVIEW is written by exactly one CUSTOMER.
-
-16. A CUSTOMER can write zero or many REVIEWS.
+28. Every REVIEW is written by exactly one CUSTOMER.
+29. A CUSTOMER can write zero or many REVIEWS.
 
 ## Restaurant and Review
 
-17. Every REVIEW is associated with exactly one RESTAURANT.
-
-18. A RESTAURANT can receive zero or many REVIEWS.
-
-19. A RESTAURANT's avg_rating is derived from its REVIEWS.
+30. Every REVIEW is associated with exactly one RESTAURANT.
+31. A RESTAURANT can receive zero or many REVIEWS.
 
 ## Order Status History
 
-20. Every ORDER must have one or more ORDER_STATUS_HISTORY records.
-
-21. Every ORDER_STATUS_HISTORY record belongs to exactly one ORDER.
-
-22. An ORDER's current_status is derived from its most recent
-ORDER_STATUS_HISTORY record.
-
-## Customer Loyalty
-
-23. A CUSTOMER can have zero or many LOYALTY_TRANSACTIONS.
-
-24. Every LOYALTY_TRANSACTION belongs to exactly one CUSTOMER.
-
-25. A CUSTOMER's loyalty_points is derived from the sum of points
-recorded in LOYALTY_TRANSACTION.
+32. Every ORDER must have one or more ORDER_STATUS_HISTORY records.
+33. Every ORDER_STATUS_HISTORY record belongs to exactly one ORDER.
 
 ## Order Delivery Information
 
-26. Every ORDER has exactly one delivery_address.
+34. Every ORDER has exactly one delivery_address.
 
-27. An ORDER's estimated_delivery_time is derived from order processing
-and delivery information.
+## Customer Loyalty
+
+35. A CUSTOMER can have zero or many LOYALTY_TRANSACTIONS.
+36. Every LOYALTY_TRANSACTION belongs to exactly one CUSTOMER.
+
+## Order Status Transitions
+
+The order status follows the defined transition flow:
+
+  -----------------------------------------------------------------------
+  Current Status          Meaning                 Can transition to
+  ----------------------- ----------------------- -----------------------
+  Pending                 Order has been created  Preparing, Cancelled
+                          and is waiting for      
+                          processing.             
+
+  Preparing               Restaurant is preparing Ready, Cancelled
+                          the order.              
+
+  Ready                   Order is ready for      On The Way, Cancelled
+                          pickup/delivery.        
+
+  On The Way              Driver is transporting  Delivered, Delivery
+                          the order to the        Failed
+                          customer.               
+
+  Delivered               Order has been          No further transition
+                          completed.              
+
+  Cancelled               Order has been          No further transition
+                          cancelled.              
+
+  Delivery Failed         Delivery was            On The Way, Cancelled
+                          unsuccessful and        
+                          requires further        
+                          handling.               
+  -----------------------------------------------------------------------
+
+## Multi-Valued Attributes
+
+The ER/EER model represents the following multi-valued attributes:
+
+-   CUSTOMER.address
+-   ORDER.order_notes
+-   ORDER_ITEM.customizations
