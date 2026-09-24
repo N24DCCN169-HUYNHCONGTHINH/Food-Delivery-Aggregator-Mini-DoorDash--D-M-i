@@ -1,5 +1,10 @@
 # Food Delivery Aggregator (Mini-DoorDash)
 
+### Member
+- N24DCCN169 HUYNH CONG THINH
+- N24DCCN140 HA DINH MANH
+- N24DCCN134 LY TRONG KHOI
+
 ## Phase 1 - Conceptual Design
 
 This repository contains the Phase 1 conceptual database design for a
@@ -100,7 +105,3 @@ delivery/order status scenarios.
 
 **Status:** Conceptual design completed with Problem Statement, Business
 Rules, Comprehensive ER/EER Diagram, and Phase 1 project report.
-### Member
-- N24DCCN169 HUYNH CONG THINH
-- N24DCCN140 HA DINH MANH
-- N24DCCN134 LY TRONG KHOI
