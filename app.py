@@ -436,6 +436,72 @@ def index():
     )
 
 
+@app.get("/search")
+def global_search():
+    search_term = request.args.get("q", "").strip()[:100]
+    if not search_term:
+        return redirect(url_for("index"))
+    pattern = f"%{search_term}%"
+    restaurants = query_all(
+        """SELECT r.restaurant_id, r.name,
+                  GROUP_CONCAT(DISTINCT mi.name ORDER BY mi.name SEPARATOR ', ') AS matching_items
+           FROM RESTAURANT r
+           LEFT JOIN MENU_ITEM mi ON mi.restaurant_id = r.restaurant_id
+           WHERE r.is_active = TRUE
+             AND (r.name LIKE %s OR mi.name LIKE %s OR mi.description LIKE %s)
+           GROUP BY r.restaurant_id, r.name
+           ORDER BY r.name LIMIT 30""",
+        (pattern, pattern, pattern),
+    )
+
+    role = session.get("role")
+    orders: list[dict[str, Any]] = []
+    order_sql = """SELECT DISTINCT o.order_id, o.order_time, r.name AS restaurant_name,
+                           c.first_name, c.last_name, s.status AS order_status
+                    FROM ORDERS o
+                    JOIN RESTAURANT r ON r.restaurant_id = o.restaurant_id
+                    JOIN CUSTOMER c ON c.customer_id = o.customer_id
+                    LEFT JOIN ORDER_CURRENT_STATUS s ON s.order_id = o.order_id
+                    LEFT JOIN DELIVERY_ASSIGNMENT latest_da ON latest_da.assignment_id = (
+                        SELECT da2.assignment_id FROM DELIVERY_ASSIGNMENT da2
+                        WHERE da2.order_id = o.order_id
+                        ORDER BY da2.assigned_at DESC, da2.assignment_id DESC LIMIT 1
+                    )
+                    LEFT JOIN DRIVER assigned_driver ON assigned_driver.driver_id = latest_da.driver_id
+                    {extra_join}
+                    WHERE ({scope})
+                      AND (CAST(o.order_id AS CHAR) LIKE %s OR r.name LIKE %s
+                           OR CONCAT_WS(' ', c.first_name, c.last_name) LIKE %s
+                           OR o.delivery_address LIKE %s OR s.status LIKE %s
+                           OR CONCAT_WS(' ', assigned_driver.first_name, assigned_driver.last_name) LIKE %s
+                           OR assigned_driver.phone_number LIKE %s)
+                    ORDER BY o.order_time DESC, o.order_id DESC LIMIT 50"""
+    scope = "1=0"
+    extra_join = ""
+    scope_params: tuple[Any, ...] = ()
+    if role == "customer":
+        scope = "o.customer_id = %s"
+        scope_params = (session["customer_id"],)
+    elif role == "restaurant":
+        scope = "o.restaurant_id = %s"
+        scope_params = (session["restaurant_id"],)
+    elif role == "driver":
+        extra_join = "JOIN DELIVERY_ASSIGNMENT da ON da.order_id = o.order_id"
+        scope = "da.driver_id = %s"
+        scope_params = (session["driver_id"],)
+    elif role == "admin":
+        scope = "1=1"
+    if role in {"customer", "restaurant", "driver", "admin"}:
+        orders = query_all(
+            order_sql.format(extra_join=extra_join, scope=scope),
+            (*scope_params, pattern, pattern, pattern, pattern, pattern, pattern, pattern),
+        )
+    return render_template(
+        "search_results.html", search_term=search_term,
+        restaurant_results=restaurants, order_results=orders,
+    )
+
+
 @app.get("/restaurants/<int:restaurant_id>")
 def restaurant_menu(restaurant_id: int):
     restaurants = query_all(
@@ -1039,6 +1105,7 @@ def driver_portal():
 @app.get("/delivery")
 @admin_login_required
 def delivery_dispatch():
+    search_term = request.args.get("q", "").strip()[:100]
     delivery_orders = query_all(
         """SELECT o.order_id, o.order_time, o.delivery_address,
                   c.first_name, c.last_name, r.name AS restaurant_name,
@@ -1065,10 +1132,33 @@ def delivery_dispatch():
                ORDER BY l.recorded_at DESC, l.location_id DESC LIMIT 1
            )
            WHERE s.status IN ('Pending', 'Preparing', 'Ready', 'On The Way', 'Delivery Failed')
+             AND (%s = '' OR CAST(o.order_id AS CHAR) LIKE %s
+                  OR CONCAT_WS(' ', c.first_name, c.last_name) LIKE %s
+                  OR r.name LIKE %s OR o.delivery_address LIKE %s
+                  OR CONCAT_WS(' ', d.first_name, d.last_name) LIKE %s
+                  OR d.phone_number LIKE %s)
            ORDER BY CASE s.status WHEN 'Pending' THEN 1 WHEN 'Preparing' THEN 2
                                   WHEN 'Ready' THEN 3 WHEN 'On The Way' THEN 4 ELSE 5 END,
-                    s.changed_at, o.order_id"""
+                    s.changed_at, o.order_id""",
+        (search_term, *([f"%{search_term}%"] * 6)),
     )
+    search_suggestions: list[str] = []
+    seen_suggestions: set[str] = set()
+    for order in delivery_orders:
+        candidates = [
+            f"{order['first_name']} {order['last_name']}",
+            order["restaurant_name"],
+            f"{order['driver_first_name']} {order['driver_last_name']}" if order["driver_first_name"] else None,
+            order["driver_phone"], order["delivery_address"], f"#{order['order_id']}",
+        ]
+        for candidate in candidates:
+            if candidate and candidate.casefold() not in seen_suggestions:
+                seen_suggestions.add(candidate.casefold())
+                search_suggestions.append(candidate)
+                if len(search_suggestions) >= 200:
+                    break
+        if len(search_suggestions) >= 200:
+            break
     drivers = query_all(
         """SELECT d.driver_id, d.first_name, d.last_name, d.phone_number, d.vehicle_type
            FROM DRIVER d JOIN PHASE4_ACCOUNT a ON a.driver_id=d.driver_id
@@ -1092,7 +1182,8 @@ def delivery_dispatch():
             assignments_by_order[assignment["order_id"]].append(assignment)
     return render_template(
         "dispatch.html", orders=delivery_orders, drivers=drivers,
-        assignments_by_order=assignments_by_order,
+        assignments_by_order=assignments_by_order, search_term=search_term,
+        search_suggestions=search_suggestions,
     )
 
 

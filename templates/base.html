@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='storefront.css') }}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
-  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">M</span> Mini DoorDash</a><nav>
+  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">M</span> Mini DoorDash</a><form class="global-search" method="get" action="{{ url_for('global_search') }}" role="search"><label class="visually-hidden" for="global-search-query">Tìm kiếm</label><span aria-hidden="true">⌕</span><input id="global-search-query" type="search" name="q" value="{{ request.args.get('q', '') if request.endpoint == 'global_search' else '' }}" placeholder="Tìm nhà hàng, món ăn{% if session.get('role') %}, đơn hàng{% endif %}…" autocomplete="off"><button type="submit" aria-label="Tìm kiếm">Tìm</button></form><nav>
     <a href="{{ url_for('index') }}">Nhà hàng & món</a>
     {% if session.get('role') == 'customer' %}<a href="{{ url_for('customer_portal') }}">Đơn của tôi</a><a class="nav-account" href="{{ url_for('account_profile') }}">{{ session.get('customer_name', 'Tài khoản') }}</a>
     {% elif session.get('role') == 'restaurant' %}<a href="{{ url_for('restaurant_portal') }}">Góc nhà hàng</a><a class="nav-account" href="{{ url_for('account_change_password') }}">{{ session.get('customer_name', 'Nhà hàng') }}</a>

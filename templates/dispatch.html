@@ -1,7 +1,13 @@
 {% extends 'base.html' %}{% block title %}Điều phối · Mini DoorDash{% endblock %}{% block content %}
 <section class="dispatch-hero"><div><div class="eyebrow">VẬN HÀNH GIAO HÀNG</div><h1>Bảng điều phối</h1><p>Nhà hàng cập nhật khâu chuẩn bị. Tài xế xử lý lượt giao của họ. Điều phối viên phân công và theo dõi ngoại lệ.</p></div><div class="dispatch-icon">↗</div></section>
 <div class="role-hint"><b>Đang ở vai trò Điều phối</b><span>Phân công tài xế hoặc xem tiến độ. Dùng các tab vai trò phía trên để thao tác như nhà hàng và từng tài xế.</span></div>
-<div class="section-heading"><div><div class="eyebrow">BÀN GIAO VÀ THEO DÕI</div><h2>Đơn đang xử lý</h2></div><span class="muted">{{ orders|length }} đơn trong luồng vận hành</span></div>
+<div class="section-heading"><div><div class="eyebrow">BÀN GIAO VÀ THEO DÕI</div><h2>Đơn đang xử lý</h2></div><span class="muted">{{ orders|length }} đơn{% if search_term %} phù hợp{% else %} trong luồng vận hành{% endif %}</span></div>
+<form class="dispatch-search" method="get" action="{{ url_for('delivery_dispatch') }}" role="search">
+<label class="visually-hidden" for="dispatch-search-query">Tìm đơn điều phối</label>
+<span aria-hidden="true">⌕</span><input id="dispatch-search-query" type="search" name="q" value="{{ search_term }}" list="dispatch-search-suggestions" autocomplete="off" placeholder="Nhập tên, mã đơn, nhà hàng, tài xế hoặc địa chỉ…">
+<datalist id="dispatch-search-suggestions">{% for suggestion in search_suggestions %}<option value="{{ suggestion }}">{% endfor %}</datalist>
+<button class="button primary" type="submit">Tìm kiếm</button>{% if search_term %}<a class="button subtle" href="{{ url_for('delivery_dispatch') }}">Xóa</a>{% endif %}
+</form>
 <div class="dispatch-list">{% for o in orders %}{% set attempts = assignments_by_order.get(o.order_id, []) %}<article class="dispatch-card"><div class="dispatch-card-head"><div><a class="dispatch-order-id" href="{{ url_for('order_detail', order_id=o.order_id) }}">Đơn #{{ o.order_id }} <span>↗</span></a><div class="dispatch-meta">{{ o.restaurant_name }} · {{ o.first_name }} {{ o.last_name }}</div></div><span class="status-pill status-{{ o.order_status|lower|replace(' ', '-') }}">{{ o.order_status }}</span></div>
 <div class="dispatch-address"><span>⌖</span><div><b>Địa chỉ giao</b><p>{{ o.delivery_address }}</p></div></div>
 {% if o.driver_id %}<div class="driver-banner"><span class="driver-avatar">{{ o.driver_first_name[0] }}{{ o.driver_last_name[0] }}</span><div class="driver-data"><b>{{ o.driver_first_name }} {{ o.driver_last_name }}</b><small>{{ o.driver_phone }} · Lượt #{{ o.assignment_id }}</small></div><span class="status-pill status-{{ o.assignment_status|lower }}">{{ o.assignment_status }}</span></div>{% endif %}
