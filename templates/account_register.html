@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Tạo tài khoản · Mini DoorDash{% endblock %}
+{% block body_class %}storefront-page{% endblock %}
+{% block content %}
+<section class="sf-account-shell">
+  <a class="sf-back-link" href="{{ url_for('index') }}"><span>←</span> Tiếp tục khám phá</a>
+  <div class="sf-account-card">
+    <div class="sf-account-intro"><span class="sf-account-icon">M</span><span class="sf-kicker">MINI DOORDASH · BẮT ĐẦU ĐẶT MÓN</span><h1>Tạo tài khoản</h1><p>Lưu thông tin giao hàng và xem toàn bộ hành trình đơn của bạn.</p></div>
+    <form class="sf-account-form" method="post" action="{{ url_for('account_register_submit') }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <div class="sf-account-name-fields"><label>Họ<input name="first_name" autocomplete="given-name" required maxlength="50" value="{{ request.form.get('first_name', '') }}"></label><label>Tên<input name="last_name" autocomplete="family-name" required maxlength="50" value="{{ request.form.get('last_name', '') }}"></label></div>
+      <label>Email<input type="email" name="email" autocomplete="email" required maxlength="100" value="{{ request.form.get('email', '') }}" placeholder="ban@email.com"></label>
+      <label>Số điện thoại<input type="tel" name="phone_number" autocomplete="tel" required maxlength="20" value="{{ request.form.get('phone_number', '') }}" placeholder="09xx xxx xxx"></label>
+      <label>Mật khẩu <small>Ít nhất 8 ký tự</small><input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Nhập lại mật khẩu<input type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required></label>
+      <button class="sf-button sf-button-primary" type="submit">Tạo tài khoản</button>
+    </form>
+    <p class="sf-account-switch">Đã có tài khoản? <a href="{{ url_for('account_login', next=next_url) }}">Đăng nhập</a></p>
+  </div>
+</section>
+{% endblock %}

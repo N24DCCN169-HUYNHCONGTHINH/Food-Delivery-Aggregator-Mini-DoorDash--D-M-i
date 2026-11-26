@@ -5,9 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Mini DoorDash{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='delivery.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='storefront.css') }}">
 </head>
-<body>
-  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">M</span> Mini DoorDash</a><nav><a href="{{ url_for('index') }}">Nhà hàng</a><a href="{{ url_for('orders') }}">Đơn hàng</a></nav></header>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">M</span> Mini DoorDash</a><nav>
+    <a href="{{ url_for('index') }}">Nhà hàng & món</a>
+    {% if session.get('role') == 'customer' %}<a href="{{ url_for('customer_portal') }}">Đơn của tôi</a><a class="nav-account" href="{{ url_for('account_profile') }}">{{ session.get('customer_name', 'Tài khoản') }}</a>
+    {% elif session.get('role') == 'restaurant' %}<a href="{{ url_for('restaurant_portal') }}">Góc nhà hàng</a><a class="nav-account" href="{{ url_for('account_change_password') }}">{{ session.get('customer_name', 'Nhà hàng') }}</a>
+    {% elif session.get('role') == 'driver' %}<a href="{{ url_for('driver_portal') }}">Chuyến của tôi</a><a class="nav-account" href="{{ url_for('account_change_password') }}">{{ session.get('customer_name', 'Tài xế') }}</a>
+    {% elif session.get('role') == 'admin' %}<a href="{{ url_for('admin_portal') }}">Quản trị</a><a href="{{ url_for('delivery_dispatch') }}">Điều phối</a><a class="nav-account" href="{{ url_for('account_change_password') }}">{{ session.get('customer_name', 'Quản trị viên') }}</a>
+    {% else %}<a class="nav-account" href="{{ url_for('account_login') }}">Đăng nhập</a><a class="nav-register" href="{{ url_for('account_register') }}">Tạo tài khoản khách</a>{% endif %}
+    {% if session.get('role') %}<form class="nav-logout" method="post" action="{{ url_for('account_logout') }}"><button type="submit">Đăng xuất</button></form>{% endif %}
+  </nav></header>
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="notices">{% for category, message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
     {% block content %}{% endblock %}

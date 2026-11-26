@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Đăng nhập · Mini DoorDash{% endblock %}
+{% block body_class %}storefront-page{% endblock %}
+{% block content %}
+<section class="sf-account-shell">
+  <a class="sf-back-link" href="{{ url_for('index') }}"><span>←</span> Tiếp tục khám phá</a>
+  <div class="sf-account-card">
+    <div class="sf-account-intro"><span class="sf-account-icon">M</span><span class="sf-kicker">MINI DOORDASH · CỔNG TÀI KHOẢN</span><h1>Chào mừng trở lại</h1><p>Khách hàng, nhà hàng, tài xế và quản trị viên đăng nhập bằng tài khoản được cấp cho vai trò của mình.</p></div>
+    <form class="sf-account-form" method="post" action="{{ url_for('account_login_submit') }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <label>Email<input type="email" name="email" autocomplete="email" required maxlength="100" value="{{ request.form.get('email', '') }}" placeholder="ban@email.com"></label>
+      <label>Mật khẩu<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="sf-button sf-button-primary" type="submit">Đăng nhập</button>
+    </form>
+    <p class="sf-account-switch">Đặt món lần đầu? <a href="{{ url_for('account_register', next=next_url) }}">Tạo tài khoản khách hàng</a></p>
+  </div>
+</section>
+{% endblock %}

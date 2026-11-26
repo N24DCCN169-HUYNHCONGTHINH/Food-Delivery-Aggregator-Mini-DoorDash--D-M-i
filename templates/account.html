@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Tài khoản của tôi · Mini DoorDash{% endblock %}
+{% block body_class %}storefront-page{% endblock %}
+{% block content %}
+<section class="sf-account-page">
+  <div class="sf-account-page-heading"><div><span class="sf-kicker">MINI DOORDASH · HỒ SƠ CỦA BẠN</span><h1>Tài khoản của tôi</h1><p>Quản lý thông tin liên hệ, mật khẩu và địa chỉ giao hàng.</p></div><a class="sf-button sf-button-outline" href="{{ url_for('customer_portal') }}">Đơn hàng & điểm thưởng →</a></div>
+  <div class="sf-profile-grid">
+    <section class="sf-account-card"><div class="sf-account-section-title"><span>01</span><div><h2>Thông tin cá nhân</h2><p>Thông tin hiển thị cho đơn hàng của bạn.</p></div></div>
+      <form class="sf-account-form" method="post" action="{{ url_for('account_profile') }}">
+        <div class="sf-account-name-fields"><label>Họ<input name="first_name" autocomplete="given-name" required maxlength="50" value="{{ customer.first_name }}"></label><label>Tên<input name="last_name" autocomplete="family-name" required maxlength="50" value="{{ customer.last_name }}"></label></div>
+        <label>Email<input type="email" name="email" autocomplete="email" required maxlength="100" value="{{ customer.email }}"></label>
+        <label>Số điện thoại<input type="tel" name="phone_number" autocomplete="tel" required maxlength="20" value="{{ customer.phone_number }}"></label>
+        <button class="sf-button sf-button-primary" type="submit">Lưu thay đổi</button>
+      </form>
+    </section>
+    <section class="sf-account-card"><div class="sf-account-section-title"><span>02</span><div><h2>Sổ địa chỉ</h2><p>Địa chỉ này sẽ có sẵn khi bạn đặt món.</p></div></div>
+      <form class="sf-account-form sf-address-add" method="post" action="{{ url_for('account_add_address') }}"><label>Thêm địa chỉ giao hàng<input name="address_text" maxlength="255" required placeholder="Số nhà, đường, phường, thành phố"></label><button class="sf-button sf-button-primary" type="submit">+ Lưu địa chỉ</button></form>
+      <div class="sf-address-list">{% for address in addresses %}<article class="sf-address-row"><span class="sf-address-pin">⌖</span><p>{{ address.address_text }}</p><form method="post" action="{{ url_for('account_delete_address', address_id=address.address_id) }}" onsubmit="return confirm('Xóa địa chỉ này khỏi sổ địa chỉ?')"><button type="submit" aria-label="Xóa địa chỉ">×</button></form></article>{% else %}<div class="sf-account-empty">Chưa lưu địa chỉ. Thêm địa chỉ để đặt món nhanh hơn.</div>{% endfor %}</div>
+    </section>
+    <section class="sf-account-card sf-password-card"><div class="sf-account-section-title"><span>03</span><div><h2>Bảo mật</h2><p>Chọn mật khẩu riêng và khó đoán.</p></div></div>
+      <form class="sf-account-form" method="post" action="{{ url_for('account_change_password') }}"><label>Mật khẩu hiện tại<input type="password" name="current_password" autocomplete="current-password" required></label><label>Mật khẩu mới <small>Ít nhất 8 ký tự</small><input type="password" name="password" autocomplete="new-password" minlength="8" required></label><label>Nhập lại mật khẩu mới<input type="password" name="password_confirmation" autocomplete="new-password" minlength="8" required></label><button class="sf-button sf-button-outline" type="submit">Đổi mật khẩu</button></form>
+    </section>
+  </div>
+</section>
+{% endblock %}
