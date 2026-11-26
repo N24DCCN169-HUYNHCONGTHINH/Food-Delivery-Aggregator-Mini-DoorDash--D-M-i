@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}Đơn hàng · Mini DoorDash{% endblock %}{% block content %}
+<section class="page-heading"><div class="eyebrow">ĐIỀU PHỐI & THEO DÕI</div><h1>Đơn hàng gần đây</h1><p>Trạng thái được lấy từ lịch sử đơn hàng trong MySQL.</p></section>
+<div class="order-list">{% for o in orders %}<a class="order-card" href="{{ url_for('order_detail', order_id=o.order_id) }}"><div class="order-id">#{{ o.order_id }}<small>{{ o.order_time.strftime('%d/%m/%Y %H:%M') if o.order_time else '' }}</small></div><div class="order-person"><b>{{ o.first_name }} {{ o.last_name }}</b><small>{{ o.restaurant_name }}</small></div><div class="order-total">{{ '{:,.0f}'.format(o.total_amount) }} ₫</div><span class="status-pill status-{{ (o.status or 'pending')|lower|replace(' ', '-') }}">{{ o.status or 'Chưa có trạng thái' }}</span><span class="arrow">→</span></a>{% else %}<div class="empty">Chưa có đơn hàng trong cơ sở dữ liệu.</div>{% endfor %}</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block title %}Nhà hàng · Mini DoorDash{% endblock %}
+{% block content %}
+<section class="hero"><div class="eyebrow">FOOD DELIVERY · TP. HỒ CHÍ MINH</div><h1>Bữa ngon, giao tận cửa.</h1><p>Khám phá thực đơn từ các nhà hàng trong dữ liệu demo và đặt đơn ngay.</p><a class="button light" href="#restaurants">Khám phá nhà hàng ↓</a></section>
+<section id="restaurants"><div class="section-heading"><div><div class="eyebrow">DÀNH CHO BẠN</div><h2>Nhà hàng nổi bật</h2></div><span class="muted">{{ restaurants|length }} nhà hàng</span></div>
+<div class="restaurant-grid">{% for r in restaurants %}<article class="restaurant-card"><div class="restaurant-art art-{{ loop.index }}"><span>{{ ['🍣','🍲','🍗','🥬'][loop.index0 % 4] }}</span><small>{{ ['NHẬT BẢN','MÌ CAY HÀN QUỐC','ĐẶC SẢN TÂY BẮC','ẨM THỰC CHAY'][loop.index0 % 4] }}</small></div><div class="card-body"><div class="card-title"><h3>{{ r.name }}</h3><span class="rating">★ {{ r.avg_rating }}</span></div><p>{{ r.phone_number }} · {{ r.menu_count }} món</p><a class="button primary full" href="{{ url_for('restaurant_menu', restaurant_id=r.restaurant_id) }}">Xem thực đơn <span>→</span></a></div></article>{% else %}<p>Chưa có nhà hàng. Hãy nạp seed data từ Phase 3.</p>{% endfor %}</div></section>
+<div class="info-strip"><span class="info-icon">✦</span><div><b>Một dự án cơ sở dữ liệu hoàn chỉnh</b><p>Thực đơn, đơn hàng, lịch sử trạng thái và dữ liệu mẫu kết nối trực tiếp tới MySQL.</p></div></div>
+{% endblock %}
