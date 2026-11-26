@@ -7,9 +7,9 @@
   <div class="sf-profile-grid">
     <section class="sf-account-card"><div class="sf-account-section-title"><span>01</span><div><h2>Thông tin cá nhân</h2><p>Thông tin hiển thị cho đơn hàng của bạn.</p></div></div>
       <form class="sf-account-form" method="post" action="{{ url_for('account_profile') }}">
-        <div class="sf-account-name-fields"><label>Họ<input name="first_name" autocomplete="given-name" required maxlength="50" value="{{ customer.first_name }}"></label><label>Tên<input name="last_name" autocomplete="family-name" required maxlength="50" value="{{ customer.last_name }}"></label></div>
-        <label>Email<input type="email" name="email" autocomplete="email" required maxlength="100" value="{{ customer.email }}"></label>
-        <label>Số điện thoại<input type="tel" name="phone_number" autocomplete="tel" required maxlength="20" value="{{ customer.phone_number }}"></label>
+        <div class="sf-account-name-fields"><label>Họ<input name="first_name" autocomplete="given-name" required maxlength="50" value="{{ request.form.get('first_name', customer.first_name) if request.method == 'POST' else customer.first_name }}"></label><label>Tên<input name="last_name" autocomplete="family-name" required maxlength="50" value="{{ request.form.get('last_name', customer.last_name) if request.method == 'POST' else customer.last_name }}"></label></div>
+        <label>Email<input type="email" name="email" autocomplete="email" required maxlength="100" value="{{ request.form.get('email', customer.email) if request.method == 'POST' else customer.email }}"></label>
+        <label>Số điện thoại<input type="tel" name="phone_number" autocomplete="tel" inputmode="tel" required maxlength="20" value="{{ request.form.get('phone_number', customer.phone_number) if request.method == 'POST' else customer.phone_number }}"></label>
         <button class="sf-button sf-button-primary" type="submit">Lưu thay đổi</button>
       </form>
     </section>
