@@ -41,24 +41,31 @@ def main() -> None:
                 f"expected {EXPECTED_DATABASE!r}."
             )
 
+        # The requested password is shared by all demo users, so one salted
+        # Werkzeug hash is sufficient and avoids running scrypt thousands of times.
+        print("Đang tạo mã băm mật khẩu...", flush=True)
+        password_hash = generate_password_hash(password)
+
         cursor.execute("SELECT customer_id, email FROM CUSTOMER")
         customers = cursor.fetchall()
-        for customer in customers:
-            cursor.execute(
-                "UPDATE CUSTOMER SET password_hash=%s WHERE customer_id=%s",
-                (generate_password_hash(password), customer["customer_id"]),
-            )
+        print(f"Đang cập nhật mật khẩu cho {len(customers)} khách hàng...", flush=True)
+        cursor.executemany(
+            "UPDATE CUSTOMER SET password_hash=%s WHERE customer_id=%s",
+            [(password_hash, customer["customer_id"]) for customer in customers],
+        )
+        print("Đã cập nhật khách hàng.", flush=True)
 
         cursor.execute(
             """SELECT account_id, role, restaurant_id, driver_id
                FROM PHASE4_ACCOUNT WHERE role IN ('restaurant', 'driver')"""
         )
         linked_accounts = cursor.fetchall()
-        for account in linked_accounts:
-            cursor.execute(
-                "UPDATE PHASE4_ACCOUNT SET password_hash=%s WHERE account_id=%s",
-                (generate_password_hash(password), account["account_id"]),
-            )
+        print(f"Đang đặt lại mật khẩu cho {len(linked_accounts)} tài khoản đối tác...", flush=True)
+        cursor.executemany(
+            "UPDATE PHASE4_ACCOUNT SET password_hash=%s WHERE account_id=%s",
+            [(password_hash, account["account_id"]) for account in linked_accounts],
+        )
+        print("Đã xử lý tài khoản đối tác hiện có.", flush=True)
 
         linked_restaurants = {
             account["restaurant_id"]
@@ -83,6 +90,7 @@ def main() -> None:
 
         created_restaurants = 0
         skipped_restaurants = 0
+        restaurant_inserts = []
         cursor.execute("SELECT restaurant_id, name, email FROM RESTAURANT ORDER BY restaurant_id")
         for restaurant in cursor.fetchall():
             if restaurant["restaurant_id"] in linked_restaurants:
@@ -92,22 +100,24 @@ def main() -> None:
             if not email or key in occupied_emails:
                 skipped_restaurants += 1
                 continue
-            cursor.execute(
+            restaurant_inserts.append(
+                (email, restaurant["name"][:120], password_hash, restaurant["restaurant_id"])
+            )
+            occupied_emails.add(key)
+        if restaurant_inserts:
+            print(f"Đang tạo {len(restaurant_inserts)} tài khoản nhà hàng...", flush=True)
+            cursor.executemany(
                 """INSERT INTO PHASE4_ACCOUNT
                    (role, email, display_name, password_hash, restaurant_id)
                    VALUES ('restaurant', %s, %s, %s, %s)""",
-                (
-                    email,
-                    restaurant["name"][:120],
-                    generate_password_hash(password),
-                    restaurant["restaurant_id"],
-                ),
+                restaurant_inserts,
             )
-            occupied_emails.add(key)
-            created_restaurants += 1
+            created_restaurants = len(restaurant_inserts)
+        print("Đã xử lý hồ sơ nhà hàng.", flush=True)
 
         created_drivers = 0
         skipped_drivers = 0
+        driver_inserts = []
         cursor.execute(
             "SELECT driver_id, first_name, last_name, email FROM DRIVER ORDER BY driver_id"
         )
@@ -119,19 +129,25 @@ def main() -> None:
             if not email or key in occupied_emails:
                 skipped_drivers += 1
                 continue
-            cursor.execute(
-                """INSERT INTO PHASE4_ACCOUNT
-                   (role, email, display_name, password_hash, driver_id)
-                   VALUES ('driver', %s, %s, %s, %s)""",
+            driver_inserts.append(
                 (
                     email,
                     f"{driver['first_name']} {driver['last_name']}"[:120],
-                    generate_password_hash(password),
+                    password_hash,
                     driver["driver_id"],
-                ),
+                )
             )
             occupied_emails.add(key)
-            created_drivers += 1
+        if driver_inserts:
+            print(f"Đang tạo {len(driver_inserts)} tài khoản tài xế...", flush=True)
+            cursor.executemany(
+                """INSERT INTO PHASE4_ACCOUNT
+                   (role, email, display_name, password_hash, driver_id)
+                   VALUES ('driver', %s, %s, %s, %s)""",
+                driver_inserts,
+            )
+            created_drivers = len(driver_inserts)
+        print("Đã xử lý hồ sơ tài xế.", flush=True)
 
         connection.commit()
         print(f"Customer passwords updated: {len(customers)}")
