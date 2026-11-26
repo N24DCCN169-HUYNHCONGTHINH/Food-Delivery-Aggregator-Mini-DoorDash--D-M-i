@@ -48,6 +48,7 @@ Các vai trò được giới hạn theo tài khoản đăng nhập. Dữ liệu
 │   ├── 01_Problem_Statement.md
 │   ├── 02_Business_Rules.md
 │   ├── 03_ERD.png
+│   ├── Bao_cao_tong_hop_Mini_DoorDash_DiMuoi.pdf # Báo cáo tổng hợp Phase 1–3
 │   ├── Dì Mười_Phase1.pdf
 │   └── Dì Mười_Phase 2_v9.pdf
 ├── scripts/
@@ -154,11 +155,12 @@ Health check thành công trả về JSON có `"status":"ok"` và `"database":"c
 - [Problem Statement](docs/01_Problem_Statement.md)
 - [Business Rules](docs/02_Business_Rules.md)
 - [ERD Phase 1](docs/03_ERD.png)
+- [Báo cáo tổng hợp Mini DoorDash — Phase 1, 2 và 3 (v2)](docs/Bao_cao_tong_hop_Mini_DoorDash_DiMuoi.pdf)
 - [Báo cáo Phase 1](docs/D%C3%AC%20M%C6%B0%E1%BB%9Di_Phase1.pdf)
 - [Tài liệu Phase 2](docs/D%C3%AC%20M%C6%B0%E1%BB%9Di_Phase%202_v9.pdf)
 - [SQL Phase 3 v3 và phần hỗ trợ Phase 4](Phase%203%20v3.sql)
 
-Theo hướng dẫn môn học, báo cáo chi tiết PDF được nộp riêng cho giảng viên; repository hiện có tài liệu PDF Phase 1 và Phase 2 như liệt kê ở trên.
+Repository hiện lưu bản PDF báo cáo tổng hợp Phase 1–3 (v2), cùng các tài liệu Phase 1 và Phase 2 riêng để tiện tra cứu.
 
 ## Cộng tác qua GitHub
 
