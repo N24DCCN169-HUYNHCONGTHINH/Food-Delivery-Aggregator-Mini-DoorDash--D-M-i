@@ -1,4 +1,4 @@
-﻿-- MINI DOORDASH - PHASE 3 + PHASE 4 (V3)
+-- MINI DOORDASH - PHASE 3 + PHASE 4 (V3)
 -- Phase 3 data, audit queries, negative tests, and database-level RBAC
 -- are based on "phase3 đã sửa 2.sql". Phase 4 DDL is preserved from
 -- "Phase 3 + Phase 4 tích hợp.sql".
